@@ -3,6 +3,7 @@ Possibly the best way in the world to protect you from web spam, now fully integ
 Akismet (for phpBB3) filters out your comment spam for you, so you can focus on more important things.
 
 Features:
+
 	Administrative Control Panel:
 		- Akismet Integration Settings
 
