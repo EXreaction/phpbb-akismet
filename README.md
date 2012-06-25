@@ -1,0 +1,4 @@
+phpbb-akismet
+=============
+
+phpBB-Akismet
