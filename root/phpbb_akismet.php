@@ -120,7 +120,7 @@ else
 	$version_config_name = 'phpbb_akismet_version';
 
 	$versions = array(
-		'1.0.0-dev'	=> array(
+		'1.0.0'	=> array(
 			'table_column_add'	=> array(
 				array(POSTS_TABLE, 'akismet_spam', array('BOOL', 0)),
 				array(POSTS_TABLE, 'akismet_ham', array('BOOL', 0)),

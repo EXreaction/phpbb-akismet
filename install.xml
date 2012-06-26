@@ -22,7 +22,7 @@ Support by the author is only provided at http://www.lithiumstudios.org</author-
 		</author>
 	</author-group>
 
-	<mod-version>1.0.0-dev</mod-version>
+	<mod-version>1.0.0</mod-version>
 
 	<installation>
 		<level>easy</level>
@@ -32,8 +32,8 @@ Support by the author is only provided at http://www.lithiumstudios.org</author-
 
 	<history>
 		<entry>
-			<date>2012-00-00</date>
-			<rev-version>1.0.0-dev</rev-version>
+			<date>2012-06-26</date>
+			<rev-version>1.0.0</rev-version>
 			<changelog lang="en">
 				<change>Initial release</change>
 			</changelog>
