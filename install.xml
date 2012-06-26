@@ -144,8 +144,8 @@ Support by the author is only provided at http://www.lithiumstudios.org</author-
 		<edit>
 			<find><![CDATA[$rowset[$row['post_id']] = array(]]></find>
 			<action type="after-add"><![CDATA[		// Start phpBB-Akismet
-		'akismet_spam'		=> $row['akismet_spam'],
-		'akismet_ham'		=> $row['akismet_ham'],
+		'akismet_spam'		=> (isset($row['akismet_spam'])) ? $row['akismet_spam'] : 0,
+		'akismet_ham'		=> (isset($row['akismet_ham'])) ? $row['akismet_ham'] : 0,
 		// End phpBB-Akismet]]></action>
 		</edit>
 		<edit>
