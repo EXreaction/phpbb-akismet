@@ -8,9 +8,8 @@ Features:
 		- Akismet Integration Settings
 
 	Moderator Control Panel:
-		- New Akismet panel
-			- Lists all messages marked as spam by Akismet
-			- Allows easy checking for ham (false positives) and approving them
+		- Moderation queue
+			- Allows easy submission for spam and ham (false positives) to Akismet service
 
 	On the view topic page:
 		- Mark a message as spam
