@@ -203,7 +203,6 @@ class Akismet {
 	 * Using this function will make you a good citizen as it helps Akismet to learn from its mistakes.  This will improve the service for everybody.
 	 */
 	public function submitSpam() {
-		trigger_error($this->getQueryString());
 		$this->sendRequest($this->getQueryString(), $this->wordPressAPIKey . '.' . $this->akismetServer, '/' . $this->akismetVersion . '/submit-spam');
 	}
 
@@ -213,7 +212,6 @@ class Akismet {
 	 * Using this function will make you a good citizen as it helps Akismet to learn from its mistakes.  This will improve the service for everybody.
 	 */
 	public function submitHam() {
-		trigger_error($this->getQueryString());
 		$this->sendRequest($this->getQueryString(), $this->wordPressAPIKey . '.' . $this->akismetServer, '/' . $this->akismetVersion . '/submit-ham');
 	}
 

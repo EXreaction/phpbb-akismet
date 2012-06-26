@@ -7,35 +7,107 @@
 *
 */
 
-define('UMIL_AUTO', true);
-$phpbb_root_path = (defined('PHPBB_ROOT_PATH')) ? PHPBB_ROOT_PATH : './';
-$phpEx = substr(strrchr(__FILE__, '.'), 1);
-
-define('IN_PHPBB', true);
-include($phpbb_root_path . 'common.' . $phpEx);
-$user->session_begin();
-$auth->acl($user->data);
-$user->setup('mods/phpbb_akismet');
-
-if (!file_exists($phpbb_root_path . 'umil/umil_auto.' . $phpEx))
+if (isset($_GET['p']))
 {
-	trigger_error('Please download the latest UMIL (Unified MOD Install Library) from: <a href="http://www.phpbb.com/mods/umil/">phpBB.com/mods/umil</a>', E_USER_ERROR);
+	define('IN_PHPBB', true);
+	$phpbb_root_path = (defined('PHPBB_ROOT_PATH')) ? PHPBB_ROOT_PATH : './';
+	$phpEx = substr(strrchr(__FILE__, '.'), 1);
+	include($phpbb_root_path . 'common.' . $phpEx);
+	include($phpbb_root_path . 'includes/akismet/phpbb_akismet.' . $phpEx);
+
+	// Start session management
+	$user->session_begin();
+	$auth->acl($user->data);
+	$user->setup(array('mods/phpbb_akismet', 'mcp'));
+
+	$post_id = request_var('p', 0);
+
+	$sql = 'SELECT * FROM ' . POSTS_TABLE . ' p, ' . USERS_TABLE . ' u
+		WHERE p.post_id = ' . $post_id . '
+			AND u.user_id = p.poster_id';
+	$result = $db->sql_query($sql);
+	$post = $db->sql_fetchrow($result);
+	$db->sql_freeresult($result);
+
+	if (!$post)
+	{
+		trigger_error($user->lang['POST_NOT_EXIST'] . '<br /><a href="javascript:history.go(-1);">' . $user->lang['BACK_TO_PREV'] . '</a>');
+	}
+	
+	$decoded = $post['post_text'];
+	decode_message($decoded, $post['bbcode_uid']);
+	
+	$flags = (($post['enable_bbcode']) ? OPTION_FLAG_BBCODE : 0) + (($post['enable_smilies']) ? OPTION_FLAG_SMILIES : 0) + (($post['enable_magic_url']) ? OPTION_FLAG_LINKS : 0);
+	$post_text = generate_text_for_display($post['post_text'], $post['bbcode_uid'], $post['bbcode_bitfield'], $flags);
+	
+	$username = get_username_string('full', $post['poster_id'], $post['username'], $post['user_colour'], $post['post_username']);
+
+	if (confirm_box(true))
+	{
+		$phpbb_akismet = new phpbb_akismet();
+		$phpbb_akismet->report_spam($post_id);
+		
+		if (!function_exists('delete_posts'))
+		{
+			include($phpbb_root_path . 'includes/functions_admin.' . $phpEx);
+		}
+
+		delete_posts('post_id', $post_id);
+
+		// Try to find the next or last post
+		$sql = 'SELECT *, ABS(' . $post['post_time'] . ' - CAST(post_time AS signed)) AS diff FROM ' . POSTS_TABLE . '
+			WHERE topic_id = ' . $post['topic_id'] . '
+				AND post_approved = 1
+			ORDER BY diff ASC';
+		$result = $db->sql_query($sql);
+		$redirect_post = $db->sql_fetchrow($result);
+		$db->sql_freeresult($result);
+
+		if ($redirect_post)
+		{
+			trigger_error($user->lang['PHPBB_AKISMET_REMOVE_SPAM_COMPLETE'] . sprintf($user->lang['RETURN_TOPIC'], '<br /><br /><a href="' . append_sid("{$phpbb_root_path}viewtopic.$phpEx", "t={$redirect_post['topic_id']}&amp;p={$redirect_post['post_id']}") . '">', '</a>'));
+		}
+		
+		trigger_error($user->lang['PHPBB_AKISMET_REMOVE_SPAM_COMPLETE'] . sprintf($user->lang['RETURN_FORUM'], '<br /><br /><a href="' . append_sid("{$phpbb_root_path}viewforum.$phpEx", "f={$post['forum_id']}") . '">', '</a>'));
+	}
+	else
+	{
+		$user->lang['PHPBB_AKISMET_REMOVE_SPAM_CONFIRM'] = sprintf($user->lang['PHPBB_AKISMET_REMOVE_SPAM_CONFIRM'], $username, $post_text);
+		confirm_box(false, 'PHPBB_AKISMET_REMOVE_SPAM');
+	}
 }
+else
+{
+	define('UMIL_AUTO', true);
+	$phpbb_root_path = (defined('PHPBB_ROOT_PATH')) ? PHPBB_ROOT_PATH : './';
+	$phpEx = substr(strrchr(__FILE__, '.'), 1);
 
-$mod_name = 'PHPBB_AKISMET';
-$version_config_name = 'phpbb_akismet_version';
+	define('IN_PHPBB', true);
+	include($phpbb_root_path . 'common.' . $phpEx);
+	$user->session_begin();
+	$auth->acl($user->data);
+	$user->setup('mods/phpbb_akismet');
 
-$versions = array(
-	'1.0.0-dev'	=> array(
-		'table_column_add'	=> array(
-			array(POSTS_TABLE, 'akismet_spam', array('BOOL', 0)),
-			array(POSTS_TABLE, 'akismet_ham', array('BOOL', 0)),
+	if (!file_exists($phpbb_root_path . 'umil/umil_auto.' . $phpEx))
+	{
+		trigger_error('Please download the latest UMIL (Unified MOD Install Library) from: <a href="http://www.phpbb.com/mods/umil/">phpBB.com/mods/umil</a>', E_USER_ERROR);
+	}
+
+	$mod_name = 'PHPBB_AKISMET';
+	$version_config_name = 'phpbb_akismet_version';
+
+	$versions = array(
+		'1.0.0-dev'	=> array(
+			'table_column_add'	=> array(
+				array(POSTS_TABLE, 'akismet_spam', array('BOOL', 0)),
+				array(POSTS_TABLE, 'akismet_ham', array('BOOL', 0)),
+			),
+			'config_add'		=> array(
+				array('phpbb_akismet_enabled', true),
+				array('phpbb_akismet_key', ''),
+			),
 		),
-		'config_add'		=> array(
-			array('phpbb_akismet_enabled', true),
-			array('phpbb_akismet_key', ''),
-		),
-	),
-);
+	);
 
-include($phpbb_root_path . 'umil/umil_auto.' . $phpEx);
+	include($phpbb_root_path . 'umil/umil_auto.' . $phpEx);
+}

@@ -123,15 +123,13 @@ class phpbb_akismet extends Akismet
 	private function report($mode, $post_ids)
 	{
 		global $db;
+		
+		if (!is_array($post_ids))
+		{
+			$post_ids = array($post_ids);
+		}
 
 		$post_ids = array_map('intval', $post_ids);
-
-		if (!function_exists('decode_message'))
-		{
-			global $phpbb_root_path, $phpEx;
-
-			include($phpbb_root_path . 'includes/functions_content.' . $phpEx);
-		}
 
 		$sql = 'SELECT * FROM ' . POSTS_TABLE . ' p, ' . USERS_TABLE . ' u
 			WHERE ' . $db->sql_in_set('post_id', $post_ids) . '
@@ -156,10 +154,14 @@ class phpbb_akismet extends Akismet
 			}
 			else
 			{
+				// Mark as ham in the database
+				$this->akismet_spam($row['post_id'], false);
+				$this->akismet_ham($row['post_id']);
+
 				$this->submitHam();
 			}
 		}
-		$db->freeresult($result);
+		$db->sql_freeresult($result);
 	}
 
 	/**
@@ -167,7 +169,7 @@ class phpbb_akismet extends Akismet
 	*
 	* @param mixed $post_id
 	*/
-	public function akismet_spam($post_id)
+	public function akismet_spam($post_id, $is_spam = true)
 	{
 		global $db;
 
@@ -177,7 +179,7 @@ class phpbb_akismet extends Akismet
 		}
 
 		$sql = 'UPDATE ' . POSTS_TABLE . '
-			SET akismet_spam = 1
+			SET akismet_spam = ' . (bool) $is_spam . '
 			WHERE post_id = ' . (int) $post_id;
 		$db->sql_query($sql);
 
@@ -189,7 +191,7 @@ class phpbb_akismet extends Akismet
 	*
 	* @param mixed $post_id
 	*/
-	public function akismet_ham($post_id)
+	public function akismet_ham($post_id, $is_ham = true)
 	{
 		global $db;
 
@@ -199,7 +201,7 @@ class phpbb_akismet extends Akismet
 		}
 
 		$sql = 'UPDATE ' . POSTS_TABLE . '
-			SET akismet_ham = 1
+			SET akismet_ham = ' . (bool) $is_ham . '
 			WHERE post_id = ' . (int) $post_id;
 		$db->sql_query($sql);
 

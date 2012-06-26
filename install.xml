@@ -39,10 +39,6 @@ Support by the author is only provided at http://www.lithiumstudios.org</author-
 			</changelog>
 		</entry>
 	</history>
-
-	<link-group>
-		<link type="template" href="subsilver2.xml" lang="en">subsilver2</link>
-	</link-group>
 </header>
 
 <action-group>
@@ -55,7 +51,7 @@ Support by the author is only provided at http://www.lithiumstudios.org</author-
 			<action type="before-add"><![CDATA[						// Start phpBB-Akismet
 						'legend_phpbb_akismet'	=> 'PHPBB_AKISMET',
 						'phpbb_akismet_enabled'	=> array('lang' => 'PHPBB_AKISMET_ENABLED',	'validate' => 'bool',	'type' => 'radio:enabled_disabled', 'explain' => true),
-						'phpbb_akismet_key'		=> array('lang' => 'PHPBB_AKISMET_API_KEY',	'validate' => 'string',	'type' => 'text:3:4', 'explain' => true),
+						'phpbb_akismet_key'		=> array('lang' => 'PHPBB_AKISMET_API_KEY',	'validate' => 'string',	'type' => 'text:20:20', 'explain' => true),
 						// End phpBB-Akismet
 
 ]]></action>
@@ -88,27 +84,18 @@ Support by the author is only provided at http://www.lithiumstudios.org</author-
     </open>
 	<open src="includes/mcp/mcp_queue.php">
 		<edit>
-			<find><![CDATA[switch ($action)]]></find>
+			<find><![CDATA[if (sizeof($post_id_list) == 1)]]></find>
 			<action type="before-add"><![CDATA[		// Start phpBB-Akismet
 		if (isset($config['phpbb_akismet_version']) && $config['phpbb_akismet_enabled'] && $config['phpbb_akismet_key'])
 		{
-			if ($action == 'approve')
+			if (!class_exists('phpbb_akismet'))
 			{
-				$post_id_list = request_var('post_id_list', array(0));
-
-				if (!class_exists('phpbb_akismet'))
-				{
-					include($phpbb_root_path . 'includes/akismet/phpbb_akismet.' . $phpEx);
-				}
-				$phpbb_akismet = new phpbb_akismet();
-
-				// Report as ham
-				$phpbb_akismet->report_ham($post_id_list);
+				include($phpbb_root_path . 'includes/akismet/phpbb_akismet.' . $phpEx);
 			}
+			$phpbb_akismet = new phpbb_akismet();
 
-			$template->assign_vars(array(
-				'PHPBB_AKISMET_INSTALLED'		=> true,
-			));
+			// Report as ham
+			$phpbb_akismet->report_ham(array_keys($post_info));
 		}
 		// End phpBB-Akismet
 
@@ -147,10 +134,43 @@ Support by the author is only provided at http://www.lithiumstudios.org</author-
 			{
 				if (isset($data['phpbb_akismet_spam']))
 				{
-					$phpbb_akismet->mark_spam($data['post_id']);
+					$phpbb_akismet->akismet_spam($data['post_id']);
 				}
 			}
 			// End phpBB-Akismet]]></action>
+		</edit>
+    </open>
+	<open src="viewtopic.php">
+		<edit>
+			<find><![CDATA[$rowset[$row['post_id']] = array(]]></find>
+			<action type="after-add"><![CDATA[
+
+		// Start phpBB-Akismet
+		'akismet_spam'		=> $row['akismet_spam'],
+		'akismet_ham'		=> $row['akismet_ham'],
+		// End phpBB-Akismet]]></action>
+		</edit>
+		<edit>
+			<find><![CDATA[// Display not already displayed Attachments for this post, we already parsed them. ;)]]></find>
+			<action type="before-add"><![CDATA[	// Start phpBB-Akismet
+	if (isset($config['phpbb_akismet_version']) && $config['phpbb_akismet_enabled'] && $config['phpbb_akismet_key'])
+	{
+		if (!isset($user->lang['AKISMET']))
+		{
+			$user->add_lang('mods/phpbb_akismet');
+		}
+		
+		if (!$row['akismet_spam'])
+		{
+			$template->assign_block_vars('postrow.custom_fields', array(
+				'PROFILE_FIELD_NAME'		=> $user->lang['AKISMET'],
+				'PROFILE_FIELD_VALUE'		=> '<a href="' . append_sid("{$phpbb_root_path}phpbb_akismet.$phpEx", "p={$row['post_id']}") . '">' . $user->lang['PHPBB_AKISMET_REMOVE_SPAM'] . '</a>',
+			));
+		}
+	}
+	// End phpBB-Akismet
+
+]]></action>
 		</edit>
     </open>
 	<php-installer>phpbb_akismet.php</php-installer>
