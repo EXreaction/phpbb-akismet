@@ -50,7 +50,7 @@ Support by the author is only provided at http://www.lithiumstudios.org</author-
 			<find><![CDATA['legend2'				=> 'POSTING',]]></find>
 			<action type="before-add"><![CDATA[						// Start phpBB-Akismet
 						'legend_phpbb_akismet'	=> 'PHPBB_AKISMET',
-						'phpbb_akismet_enabled'	=> array('lang' => 'PHPBB_AKISMET_ENABLED',	'validate' => 'bool',	'type' => 'radio:enabled_disabled', 'explain' => true),
+						'phpbb_akismet_enabled'	=> array('lang' => 'PHPBB_AKISMET_ENABLE',	'validate' => 'bool',	'type' => 'radio:enabled_disabled', 'explain' => true),
 						'phpbb_akismet_key'		=> array('lang' => 'PHPBB_AKISMET_API_KEY',	'validate' => 'string',	'type' => 'text:20:20', 'explain' => true),
 						// End phpBB-Akismet
 
