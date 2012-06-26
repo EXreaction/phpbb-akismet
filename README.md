@@ -9,7 +9,7 @@ Features:
 
 	Moderator Control Panel:
 		- Moderation queue
-			- Allows easy submission for spam and ham (false positives) to Akismet service
+			- Allows easy submission for ham (false positives) to Akismet service
 
 	On the view topic page:
 		- Mark a message as spam
