@@ -22,7 +22,7 @@ Support by the author is only provided at http://www.lithiumstudios.org</author-
 		</author>
 	</author-group>
 
-	<mod-version>1.0.0</mod-version>
+	<mod-version>1.0.1</mod-version>
 
 	<installation>
 		<level>easy</level>
@@ -36,6 +36,13 @@ Support by the author is only provided at http://www.lithiumstudios.org</author-
 			<rev-version>1.0.0</rev-version>
 			<changelog lang="en">
 				<change>Initial release</change>
+			</changelog>
+		</entry>
+		<entry>
+			<date>2012-07-12</date>
+			<rev-version>1.0.1</rev-version>
+			<changelog lang="en">
+				<change>Security - Do not allow unauthorized users to "remove spam." Thanks jsebean for noticing this and letting me know.</change>
 			</changelog>
 		</entry>
 	</history>
@@ -157,8 +164,8 @@ Support by the author is only provided at http://www.lithiumstudios.org</author-
 		{
 			$user->add_lang('mods/phpbb_akismet');
 		}
-		
-		if (!$row['akismet_spam'])
+
+		if (!$row['akismet_spam'] && $auth->acl_get('m_delete', $row['forum_id']) && $poster_id != $user->data['user_id'])
 		{
 			$template->assign_block_vars('postrow.custom_fields', array(
 				'PROFILE_FIELD_NAME'		=> $user->lang['AKISMET'],

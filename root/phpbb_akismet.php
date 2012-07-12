@@ -39,6 +39,11 @@ if (isset($_GET['p']))
 		trigger_error($user->lang['POST_NOT_EXIST'] . '<br /><a href="javascript:history.go(-1);">' . $user->lang['BACK_TO_PREV'] . '</a>');
 	}
 
+	if (!$auth->acl_get('m_delete', $post['forum_id']))
+	{
+		trigger_error('NOT_AUTHORISED');
+	}
+
 	$decoded = $post['post_text'];
 	decode_message($decoded, $post['bbcode_uid']);
 
@@ -130,6 +135,7 @@ else
 				array('phpbb_akismet_key', ''),
 			),
 		),
+		'1.0.1' => array(),
 	);
 
 	include($phpbb_root_path . 'umil/umil_auto.' . $phpEx);
