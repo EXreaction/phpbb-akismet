@@ -9,16 +9,12 @@
 
 Akismet (for phpBB3) filters out your comment spam for you, so you can focus on more important things.</description>
 
-	<author-notes lang="en">PHP5 is required, if your host does not support PHP5, find a new one.
-
-Support by the author is only provided at http://www.lithiumstudios.org</author-notes>
+	<author-notes lang="en">PHP5 is required, if your host does not support PHP5, find a new one.</author-notes>
 
 	<author-group>
 		<author>
 			<username>EXreaction</username>
 			<realname>Nathan Guse</realname>
-			<homepage>http://www.lithiumstudios.org/</homepage>
-			<email>exreaction@lithiumstudios.org</email>
 		</author>
 	</author-group>
 
