@@ -107,8 +107,7 @@ Akismet (for phpBB3) filters out your comment spam for you, so you can focus on 
     </open>
 	<open src="posting.php">
 		<edit>
-			<find><![CDATA[			// The last parameter tells submit_post if search indexer has to be run
-			$redirect_url = submit_post($mode, $post_data['post_subject'], $post_data['username'], $post_data['topic_type'], $poll, $data, $update_message, ($update_message || $update_subject) ? true : false);]]></find>
+			<find><![CDATA[$redirect_url = submit_post($mode, $post_data['post_subject']]]></find>
 			<action type="before-add"><![CDATA[			// Start phpBB-Akismet
 			if (isset($config['phpbb_akismet_version']) && $config['phpbb_akismet_enabled'] && $config['phpbb_akismet_key'])
 			{
